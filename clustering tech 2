@@ -1,0 +1,63 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+import seaborn as sns
+
+
+df = pd.read_csv("Mall_Customers.csv")
+print(df.head())
+print(df.shape)
+print(df.columns)
+
+
+df.drop("CustomerID", axis=1, inplace=True)
+print("Missing Values:\n", df.isnull().sum())
+
+
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+df["Genre"] = le.fit_transform(df["Genre"])
+
+
+x = df.iloc[:, [2, 3]]   # Annual Income vs Spending Score
+
+
+wcss = []
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i, init='k-means++', random_state=42)
+    kmeans.fit(x)
+    wcss.append(kmeans.inertia_)
+    print('k:', i, "-> wcss:", kmeans.inertia_)
+
+plt.plot(range(1, 11), wcss, marker='o')
+plt.title('The Elbow Method')
+plt.xlabel('Number of Clusters')
+plt.ylabel('WCSS')
+plt.show()
+
+
+km1 = KMeans(n_clusters=5, random_state=42)
+df["label"] = km1.fit_predict(x)
+
+plt.figure(figsize=(6, 4))
+sns.scatterplot(x='Annual Income (k$)', y='Spending Score (1-100)',
+                hue="label",
+                palette=['green', 'brown', 'orange', 'red', 'dodgerblue'],
+                data=df)
+plt.title('K-Means Clustering Result')
+plt.show()
+
+
+from sklearn.cluster import AgglomerativeClustering
+
+agc = AgglomerativeClustering(n_clusters=5)
+df["label_hc"] = agc.fit_predict(x)
+
+plt.figure(figsize=(6, 4))
+sns.scatterplot(x='Annual Income (k$)', y='Spending Score (1-100)',
+                hue="label_hc",
+                palette=['green', 'brown', 'orange', 'red', 'dodgerblue'],
+                data=df)
+plt.title('Hierarchical Clustering Result')
+plt.show()
