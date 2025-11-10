@@ -24,3 +24,5 @@ print(new_train_set.shape)
  ]
  new_email = vectorizer.transform(email)
  classifier.predict(new_email)
+
+# from :http://archive.ics.uci.edu/ml/datasets/sms+spam+collection
